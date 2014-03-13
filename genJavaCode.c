@@ -1,11 +1,6 @@
-#include <err.h>
-#include <errno.h>
-#include <limits.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 /* Ben Dubois
@@ -34,11 +29,17 @@
  * http://www.datastax.com/dev/blog/bulk-loading
 */
 static void validate() {
-	char *input, *saveptr1;
+	char *input, *saveptr1, *s;
 	char *varName, *varType, *line, *ptr;
+	char *varchar, *integer, *fl;
+	varchar = "varchar";
+	integer = "int";
+	fl = "float";
 	FILE *sql;
 	FILE *outCode;
+	FILE *outJava;
 	outCode = fopen("outputCode.txt", "w");
+	outJava = fopen("outputJava.txt", "w");
 	static const char filename[] = "bigdata_setup1.sql";
 	varName = (char*)malloc(sizeof(char)*256);
 	varType = (char*)malloc(sizeof(char)*256);
@@ -56,14 +57,32 @@ static void validate() {
 		if (varType == NULL) {
 			fprintf(stderr, "no variable type read\n");
 		}
+		int len = strlen(varType);
+		if( varType[len-1] == '\n' ) {
+			varType[len-1] = 0; //remove newline
+			varType[len-2] = 0; //remove ','
+		}
+		
 		// This line gets changed to format the code output
 		//***
-		fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }", varName, varType);
+		if (strncmp(varType, varchar, 7) > 0)
+			varType = "AsciiType";
+		//***
+// 		if (strncmp(varType, integer, 3) > 0)
+// 			varType = "LongType";
+		fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n", varName, varType);
+		fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(entry.%s), timestamp);\n", varName, varName);
 		//***
 	}
-	free(varName);
-	free(varType);
+
 }
+// 	free(varName);
+// 	free(varType);
+// 		int place;
+// 		while ((s = strstr(input, "\n")) != NULL) {
+// 			place = s - input;
+// 			input[place] = ' ';
+// 		}
 
 int main() {
 	validate();
