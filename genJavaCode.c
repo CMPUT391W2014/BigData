@@ -44,7 +44,8 @@ static void validate() {
 	varName = (char*)malloc(sizeof(char)*256);
 	varType = (char*)malloc(sizeof(char)*256);
 	input = (char*)malloc(sizeof(char)*256);
-	fprintf(outCode, "with key_validation_class=LexicalUUIDType\nand comparator=AsciiType\nand column_metadata=[\n");
+	fprintf(outCode, "with key_validation_class=LexicalUUIDType\n and comparator=AsciiType\n and column_metadata=[\n");
+	fprintf(outJave, "eventWriter.newRow(uuid);");
 	sql = fopen ( filename, "r" );
 	while(fgets(input, 256, sql) != 0) {
 		varName = strtok_r(input, " ", &saveptr1);
@@ -63,26 +64,20 @@ static void validate() {
 			varType[len-2] = 0; //remove ','
 		}
 		
-		// This line gets changed to format the code output
+		// These lines get changed to format the code output
 		//***
 		if (strncmp(varType, varchar, 7) > 0)
 			varType = "AsciiType";
 		//***
 // 		if (strncmp(varType, integer, 3) > 0)
 // 			varType = "LongType";
-		fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n", varName, varType);
-		fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(entry.%s), timestamp);\n", varName, varName);
+		fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n",
+						 varName, varType);
+		fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(entry.%s), timestamp);\n",
+						varName, varName);
 		//***
 	}
-
 }
-// 	free(varName);
-// 	free(varType);
-// 		int place;
-// 		while ((s = strstr(input, "\n")) != NULL) {
-// 			place = s - input;
-// 			input[place] = ' ';
-// 		}
 
 int main() {
 	validate();
