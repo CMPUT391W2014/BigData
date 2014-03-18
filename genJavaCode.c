@@ -45,7 +45,7 @@ static void validate() {
 	varType = (char*)malloc(sizeof(char)*256);
 	input = (char*)malloc(sizeof(char)*256);
 	fprintf(outCode, "with key_validation_class=LexicalUUIDType\n and comparator=AsciiType\n and column_metadata=[\n");
-	fprintf(outJave, "eventWriter.newRow(uuid);");
+	fprintf(outJava, "eventWriter.newRow(uuid);");
 	sql = fopen ( filename, "r" );
 	while(fgets(input, 256, sql) != 0) {
 		varName = strtok_r(input, " ", &saveptr1);
