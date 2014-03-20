@@ -31,6 +31,17 @@
 /*
  * TODO:: What does the "Constraint by timestamp" mean in the bottom of the sql schema?
  */
+
+/* how many tables to make*/
+int numTables;
+
+static void usage()
+{
+	extern char * __progname;
+	fprintf(stderr, "usage: %s number_of_tables\n", __progname);
+	exit(1);
+}
+
 static void validate() {
 	char *input, *saveptr1, *s;
 	char *varName, *varType, *line, *ptr;
@@ -51,6 +62,7 @@ static void validate() {
 	fprintf(outJava, "eventWriter.newRow(uuid);\n");
 	sql = fopen ( filename, "r" );
 	int counter = 0;
+	int bound = (480/numTables);
 	/* Start print STARTTIME and SEIZ_CELL_NUM
 	 * This defines the primary keys for each group of 60 columns.
 	 */
@@ -59,7 +71,7 @@ static void validate() {
 	fprintf(outJava, "usersWriter.addColumn(bytes(\"STARTTIME\"), bytes(entry.GETSTARTTIME), timestamp);\n");
 	fprintf(outJava, "usersWriter.addColumn(bytes(\"SEIZ_CELL_NUM\"), bytes(entry.GETSOURCENUMBER), timestamp);\n");
 	while(fgets(input, 256, sql) != 0) {
-		if (counter >= 60) {
+		if (counter >= bound) {
 			counter = 0;
 			fprintf(outCode, "}\nwith key_validation_class=LexicalUUIDType\n and comparator=AsciiType\n and column_metadata=[\n");
 			fprintf(outCode, "\t{ column_name: 'STARTTIME', validation_class: date }\n");
@@ -102,7 +114,11 @@ static void validate() {
 	}
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+	if (argc != 2) {
+		usage();
+	}
+	numTables = atoi(argv[1]);
 	validate();
 	return 1;
 }
