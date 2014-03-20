@@ -13,7 +13,7 @@ public class GeneratorThread extends Thread {
 	
 	public void run() {
 		try {
-			new FileWritingTest(thId);
+			new DataWriter(thId);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
