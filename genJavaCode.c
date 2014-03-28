@@ -68,8 +68,8 @@ static void validate() {
 	 */
 	fprintf(outCode, "\t{ column_name: 'STARTTIME', validation_class: date }\n");
 	fprintf(outCode, "\t{ column_name: 'SEIZ_CELL_NUM', validation_class: varchar(20) }\n");
-	fprintf(outJava, "usersWriter.addColumn(bytes(\"STARTTIME\"), bytes(entry.GETSTARTTIME), timestamp);\n");
-	fprintf(outJava, "usersWriter.addColumn(bytes(\"SEIZ_CELL_NUM\"), bytes(entry.GETSOURCENUMBER), timestamp);\n");
+	fprintf(outJava, "usersWriter.addColumn(bytes(\"STARTTIME\"), bytes(KARL.GETSTARTTIME), timestamp);\n");
+	fprintf(outJava, "usersWriter.addColumn(bytes(\"SEIZ_CELL_NUM\"), bytes(KARL.GETSOURCENUMBER), timestamp);\n");
 	while(fgets(input, 256, sql) != 0) {
 		if (counter >= bound) {
 			counter = 0;
@@ -77,8 +77,8 @@ static void validate() {
 			fprintf(outCode, "\t{ column_name: 'STARTTIME', validation_class: date }\n");
 			fprintf(outCode, "\t{ column_name: 'SEIZ_CELL_NUM', validation_class: varchar(20) }\n");
 			fprintf(outJava, "\neventWriter.newRow(uuid);\n");
-			fprintf(outJava, "usersWriter.addColumn(bytes(\"STARTTIME\"), bytes(entry.GETSTARTTIME), timestamp);\n");
-			fprintf(outJava, "usersWriter.addColumn(bytes(\"SEIZ_CELL_NUM\"), bytes(entry.GETSOURCENUMBER), timestamp);\n");
+			fprintf(outJava, "usersWriter.addColumn(bytes(\"STARTTIME\"), bytes(KARL.GETSTARTTIME), timestamp);\n");
+			fprintf(outJava, "usersWriter.addColumn(bytes(\"SEIZ_CELL_NUM\"), bytes(KARL.GETSOURCENUMBER), timestamp);\n");
 		}
 		else {
 			counter++;
@@ -101,15 +101,21 @@ static void validate() {
 		
 		// These lines get changed to format the code output
 		//***
-		if (strncmp(varType, varchar, 7) > 0)
+		if (strncmp(varType, varchar, 7) == 0) {
 			varType = "AsciiType";
+			fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n", varName, varType);
+			fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(KARL.randomString), timestamp);\n", varName);
+		}
 		//***
-// 		if (strncmp(varType, integer, 3) > 0)
-// 			varType = "LongType";
-		fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n",
-						 varName, varType);
-		fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(entry.%s), timestamp);\n",
-						varName, varName);
+ 		else if (strncmp(varType, integer, 3) == 0) {
+ 			varType = "LongType";
+			fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n", varName, varType);
+			fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(KARL.randomInt), timestamp);\n",	varName);
+		}
+		else {
+			fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n", varName, varType);
+			fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(KARL.randomInt), timestamp);\n",	varName);
+		}
 		//***
 	}
 }
