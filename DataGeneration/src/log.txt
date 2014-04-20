@@ -1,0 +1,16 @@
+Exception in thread "main" java.lang.NoClassDefFoundError: org/apache/cassandra/db/marshal/AbstractType
+	at java.lang.Class.getDeclaredMethods0(Native Method)
+	at java.lang.Class.privateGetDeclaredMethods(Class.java:2688)
+	at java.lang.Class.getMethod0(Class.java:2937)
+	at java.lang.Class.getMethod(Class.java:1771)
+	at sun.launcher.LauncherHelper.validateMainClass(LauncherHelper.java:544)
+	at sun.launcher.LauncherHelper.checkAndLoadMain(LauncherHelper.java:526)
+Caused by: java.lang.ClassNotFoundException: org.apache.cassandra.db.marshal.AbstractType
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:372)
+	at java.net.URLClassLoader$1.run(URLClassLoader.java:361)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:360)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:308)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 6 more

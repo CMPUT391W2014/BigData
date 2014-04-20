@@ -9,23 +9,24 @@ import java.nio.ByteBuffer;
 import java.io.*;
 import java.util.UUID;
   
-import org.apache.cassandra.db.marshal.*;
+import org.apache.cassandra.db.marshal.AsciiType;
 import org.apache.cassandra.io.sstable.SSTableSimpleUnsortedWriter;
 import static org.apache.cassandra.utils.ByteBufferUtil.bytes;
-import static org.apache.cassandra.utils.UUIDGen.decompose;
+//import static org.apache.cassandra.utils.UUIDGen.decompose;
 import org.apache.cassandra.dht.IPartitioner;
-import org.apache.cassandra.dht.RandomPartitioner;
+//import org.apache.cassandra.dht.RandomPartitioner;
+import org.apache.cassandra.dht.Murmur3Partitioner;
 
 public class DataWriter {
 	
-	private static final int COLUMN_COUNT = 475;
-	private static final int ROW_COUNT = 200000;
-	
+    //private static final int COLUMN_COUNT = 475;
+	private static final int ROW_COUNT = 5;
 	private String filePath;
 	private String logFile = "log.csv";
 	
 	private static Random rand = new Random();
 	
+    /*
 	public DataWriter(int id) {
 		filePath = "data" + String.valueOf(id) + ".csv";
 		//filePath = "data1.csv";
@@ -36,12 +37,21 @@ public class DataWriter {
 			e.printStackTrace();
 		}
 	}
-	private void execute() throws Exception {
+    */
+    //private void execute() throws Exception {
+    public static void main(String[] args) throws Exception {
 		//System.out.println("Starting");
 		long start = System.currentTimeMillis();
-                File file = new File(filePath);
-                FileWriter writer = new FileWriter(file);
-                FileWriter logger = new FileWriter(logFile, true);
+                //File file = new File(filePath);
+                //FileWriter writer = new FileWriter(file);
+                //FileWriter logger = new FileWriter(logFile, true);
+		String keyspace = "demo";
+		File directory = new File(keyspace);
+		if (!directory.exists()) {
+		    directory.mkdir();
+		}
+		IPartitioner partitioner = new Murmur3Partitioner();
+		SSTableSimpleUnsortedWriter usersWriter = new SSTableSimpleUnsortedWriter(directory, partitioner, keyspace, "cdr", AsciiType.instance, null, 64);
 		int max = 3000000;
 		int min = 1000000;
 		float longMin = 179;
@@ -52,8 +62,19 @@ public class DataWriter {
 		String strValue = randString();
 		float floatValue = rand.nextFloat() * (0 + 90);
 		String dateValue = randDate();
-		String data[] = new String[COLUMN_COUNT];
+
+		long timestamp = System.currentTimeMillis()*1000;
+		//String data[] = new String[COLUMN_COUNT];
 		for (int j = 0; j < ROW_COUNT; j++) {
+		    
+
+		    usersWriter.newRow(bytes(randString()));
+		    usersWriter.addColumn(bytes("STARTTIME"), bytes(randString()), timestamp);
+		    usersWriter.addColumn(bytes("SEIZ_CELL_NUM_L"), bytes(randString()), timestamp);
+		    usersWriter.addColumn(bytes("CONNEC_REQUEST_TIME"), bytes(randString()), timestamp);
+		    usersWriter.addColumn(bytes("CITY_ID"), bytes(randInt(min, max)), timestamp);
+		    
+		    /*
 			for (int i = 0; i < COLUMN_COUNT; i++) {
 				if ((i == 0) || (i == 39) || (i == 40)) {
 					data[i] = String.valueOf(randInt(min, max));
@@ -78,32 +99,35 @@ public class DataWriter {
 				}
 				//records.add(RECORD);
 				//size += 4;
-			}
+				*/
 	    
 			//System.out.println(data.length + " 'records'");
 			//System.out.println("Writing row number: " + String.valueOf(j) + "\n");
+			/*
 			for (int k = 0; k < COLUMN_COUNT; k++) {
 				writer.write(String.valueOf(data[k]));
 				writer.write(",");
 			}
 			writer.write("\n");
+			*/
 			//System.out.println(size / MEG + " MB");
 			//writeRaw(data, f);
 				//writeBuffered(records, 8192);
 				//writeBuffered(records, (int) MEG);
 				//writeBuffered(records, 4 * (int) MEG);
 		}
-		writer.close();
+		usersWriter.close();
+		//writer.close();
 		long end = System.currentTimeMillis();
 		//System.out.println("Done");
-		System.out.println((end - start) / 1000f + " seconds");
-		logger.append(String.valueOf((end-start) / 1000f));
-		logger.append(",");
-		logger.close();
+		//System.out.println((end - start) / 1000f + " seconds");
+		//logger.append(String.valueOf((end-start) / 1000f));
+		//logger.append(",");
+		//logger.close();
 	}
 	
 	
-	private String randDate() {
+	private static String randDate() {
 		GregorianCalendar gc = new GregorianCalendar();
 		int year = randInt(2008, 2013);
 
@@ -125,7 +149,7 @@ public class DataWriter {
 				+ ":" + gc.get(gc.MINUTE) + ":" + gc.get(gc.SECOND);
 	}
 	
-	private String randString() {
+	private static String randString() {
 		char[] chars = "abcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
 		StringBuilder sb = new StringBuilder();
 		Random random = new Random();
@@ -136,11 +160,11 @@ public class DataWriter {
 		return sb.toString();
 	}
 	
-	private int randInt(int start, int end) {
+	private static int randInt(int start, int end) {
 		return rand.nextInt((end-start) + 1) + start;
 	}
 	
-	private float randFloat(float min, float max) {
+	private static float randFloat(float min, float max) {
 		return rand.nextFloat() * (min + max) - max;
 	}
 	

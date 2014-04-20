@@ -1,6 +1,6 @@
 public class Generator {
 	
-	private static int numThreads = 1;
+	private static int numThreads = 4;
 	private static GeneratorThread threads[] = new GeneratorThread[numThreads];
 	
 	public static void main(String[] args) {
