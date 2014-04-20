@@ -12,7 +12,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 
-
+/**
+ * This class performs the process of loading data into Cassandra.
+ */
 public class DataWriter2 {
 	
     private final int ROW_COUNT = 1000;
@@ -59,17 +61,8 @@ public class DataWriter2 {
     private String cityPath;
 
 
-    
-    //try {
-    //	private static FileWriter seizFileWriter = new FileWriter(seizFile);
-    //	private static FileWriter cfcFileWriter = new FileWriter(cfcFile);
-    //} catch (Exception e) {
-    //	e.printStackTrace();
-    //}
-    
+  
 
-
-    
     public DataWriter2(int id) throws Exception {
 
 	filePath1 = "part1-" + String.valueOf(id) + ".csv";
@@ -144,33 +137,16 @@ public class DataWriter2 {
 	
 	
 
+    /**
+     * The main loop of the program. Generate csv files and load them into Cassandra.
+     */
     public void run() throws Exception {
 
 
-	//FileWriter seizFileWriter = new FileWriter(seizFile);
-    	FileWriter cfcFileWriter = new FileWriter(new File(cfcDataPath)); 
+    FileWriter cfcFileWriter = new FileWriter(new File(cfcDataPath)); 
 	FileWriter cityFileWriter = new FileWriter(new File(cityDataPath));
 
-	//File seizFile = new File(seizGroupFile);
-	//File cfcFile = new File(cfcGroupFile);
-	//	File file1 = new File(filePath1);
-	//File file2 = new File(filePath2);
-	//File file3 = new File(filePath3);
-	//File file4 = new File(filePath4);
-	//File file5 = new File(filePath5);
-	//File file6 = new File(filePath6);
-	//File file7 = new File(filePath7);
-	//File file8 = new File(filePath8);
-	//FileWriter writer1 = new FileWriter(file1);
-	//FileWriter writer2 = new FileWriter(file2);
-	//FileWriter writer3 = new FileWriter(file3);
-	//FileWriter writer4 = new FileWriter(file4);
-	//FileWriter writer5 = new FileWriter(file5);
-	//FileWriter writer6 = new FileWriter(file6);
-	//FileWriter writer7 = new FileWriter(file7);
-	//FileWriter writer8 = new FileWriter(file8);
 	for (int j = 0; j < ITERATIONS; j++) {
-	    //System.out.println("Iteration");
 	    File file1 = new File(filePath1);
 	    File file2 = new File(filePath2);
 	    File file3 = new File(filePath3);
@@ -216,8 +192,7 @@ public class DataWriter2 {
 	    writer10.close();
 	    
 
-	    //writePart2(writer2);
-	    //writer2.close();
+
 	    copyPart1();
 	    copyPart2();
 	    copyPart3();
@@ -233,25 +208,18 @@ public class DataWriter2 {
 	}
 
 	writeMaps(cfcFileWriter, cityFileWriter);
-	//seizFileWriter.close();
 	cfcFileWriter.close();
 	cityFileWriter.close();
-	//copyCity();
-	//copyCfc();
 	System.out.println("Done");
-	//writer1.close();
-	//writer2.close();
-	//writer3.close();
-	//writer4.close();
-	//writer5.close();
-	//writer6.close();
-	//writer7.close();
-	//writer8.close();
 
     }
 
 
 
+    /**
+     * Generate a random date.
+     * @return A String representing the data
+     */
     private String randDate() {
 	GregorianCalendar gc = new GregorianCalendar();
 	int year = randInt(2008, 2013);
@@ -281,29 +249,41 @@ public class DataWriter2 {
 	
     }
 
-    private String randString() {
-       	char[] chars = "abcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
-       	StringBuilder sb = new StringBuilder();
-       	Random random = new Random();
-       	for (int i = 0; i < 20; i++) {
-       	    char c = chars[random.nextInt(chars.length)];
-       	    sb.append(c);
-       	}
-       	return sb.toString();
-    }
-	
+    
+	/**
+	 * Generate a random integer value
+	 * @param start int 
+	 * @param end int
+	 * @return A random integer within the specified range
+	 */
     private int randInt(int start, int end) {
        	return rand.nextInt((end-start) + 1) + start;
     }
 	
+    /**
+     * Generate a random floating point value representing a latitude
+     * @param min float ]
+     * @param max float
+     * @return A random floating point value within the specified range
+     */
     private float randLatitude(float min, float max) {
        	return rand.nextFloat() * (min + max);
     }
-
+    
+    /**
+     * Generate a random floating point value representing a longitude
+     * @param min float 
+     * @param max float
+     * @return A random floating point value within the specified range
+     */
     private float randLongitude(float min, float max) {
 	return rand.nextFloat() * (min + max) - max;
     }
 
+    /**
+     * Generate a random phone number.
+     * @return A string representing the phone number.
+     */
     private String randPhoneNumber() {
 	char[] chars = "0123456789".toCharArray();
 	StringBuilder sb = new StringBuilder();
@@ -313,12 +293,14 @@ public class DataWriter2 {
        	    sb.append(c);
        	}
 	String number = sb.toString();
-	//Integer result = seizMap.get(number);
-	//seizMap.put(number, (result == null) ? 1: result+1);
 	
        	return number;
     }
 
+    /**
+     * Generate a random integer value representing a CFC. Restricted to one of 168, 408, 418.
+     * @return Either 468, 408, or 418. Chosen at random.
+     */
     private int randCFC() {
 	int[] vals = new int[3];
 	vals[0] = 168;
@@ -330,17 +312,24 @@ public class DataWriter2 {
 	return vals[randInt(0, 2)];
     }
 
+    /**
+     * Generate a random integer representing a city id.
+     * @param start int 
+     * @param end int
+     * @return A random integer value in teh specified range
+     */
     private int randCityId(int start, int end) {
-	//System.out.println("Function called");
 	int id = rand.nextInt((end-start) + 1) + start;
 	Integer result = cityMap.get(String.valueOf(id));
 	cityMap.put(String.valueOf(id), (result == null) ? 1: result + 1);
-	//System.out.println(cityMap.get(String.valueOf(id)));
-	//System.out.println("Should have been put in map");
 	return id;
     }
 
 
+    /**
+     * Generate the csv file for table 1.
+     * @param writer FileWriter
+     */
     private void writePart1(FileWriter writer) throws Exception {
 	for (int k = 0; k < ROW_COUNT; k++) {
 	    writer.write(randDate());
@@ -470,7 +459,10 @@ public class DataWriter2 {
 	}
     }
 
-
+    /**
+     * Generate the csv file for table 2.
+     * @param writer FileWriter
+     */
     private void writePart2(FileWriter writer) throws Exception {
 	for (int k = 0; k < ROW_COUNT; k++) {
 	    writer.write(randDate());
@@ -603,6 +595,10 @@ public class DataWriter2 {
 	}
     }
 
+    /**
+     * Generate the csv file for table 3.
+     * @param writer FileWriter
+     */
     private void writePart3(FileWriter writer) throws Exception {
 	for (int k = 0; k < ROW_COUNT; k++) {
 	    writer.write(randDate());
@@ -735,6 +731,10 @@ public class DataWriter2 {
 	}
     }
 
+    /**
+     * Generate the csv file for table 4.
+     * @param writer FileWriter
+     */
     private void writePart4(FileWriter writer) throws Exception {
 	for (int k = 0; k < ROW_COUNT; k++) {
 	    writer.write(randDate());
@@ -867,6 +867,10 @@ public class DataWriter2 {
 	}
     }
 
+    /**
+     * Generate the csv file for table 5.
+     * @param writer FileWriter
+     */
     private void writePart5(FileWriter writer) throws Exception {
 	for (int k = 0; k < ROW_COUNT; k++) {
 	    writer.write(randDate());
@@ -999,6 +1003,10 @@ public class DataWriter2 {
 	}
     }
 
+    /**
+     * Generate the csv file for table 6.
+     * @param writer FileWriter
+     */
     private void writePart6(FileWriter writer) throws Exception {
 	for (int k = 0; k < ROW_COUNT; k++) {
 	    writer.write(randDate());
@@ -1131,6 +1139,10 @@ public class DataWriter2 {
 	}
     }
 
+    /**
+     * Generate the csv file for table 7.
+     * @param writer FileWriter
+     */
     private void writePart7(FileWriter writer) throws Exception {
 	for (int k = 0; k < ROW_COUNT; k++) {
 	    writer.write(randDate());
@@ -1287,6 +1299,10 @@ public class DataWriter2 {
 	}
     }
 
+    /**
+     * Generate the csv file for table 8.
+     * @param writer FileWriter
+     */
     private void writePart8(FileWriter writer) throws Exception {
 	for (int k = 0; k < ROW_COUNT; k++) {
 	    writer.write(randDate());
@@ -1357,6 +1373,10 @@ public class DataWriter2 {
 	}
     }
 
+    /**
+     * Generate the csv file for Query3_table1.
+     * @param writer FileWriter
+     */
     private void writeQuery3_table1(FileWriter writer) throws Exception {
 	for (int k = 0; k < ROW_COUNT; k++) {
 	    writer.write(String.valueOf(randCFC()));
@@ -1371,7 +1391,10 @@ public class DataWriter2 {
 	    writer.write("\n");
 	}
     }
-
+    /**
+     * Generate the csv file for Query3_table2.
+     * @param writer FileWriter
+     */
     private void writeQuery3_table2(FileWriter writer) throws Exception {
 	for (int k = 0; k < ROW_COUNT; k++) {
 	    writer.write(randDate());
@@ -1387,7 +1410,9 @@ public class DataWriter2 {
 	}
     }
 
-
+    /**
+     * Load the values for table 1 into Cassandra
+     */
     private void copyPart1() throws IOException, InterruptedException {
 	Process p = Runtime.getRuntime().exec("python shellCall.py " + cpyPath1);
 	p.waitFor();
@@ -1404,7 +1429,9 @@ public class DataWriter2 {
 	
 
     }
-
+    /**
+     * Load the values for table 2 into Cassandra
+     */
     private void copyPart2() throws IOException, InterruptedException {
 	Process p = Runtime.getRuntime().exec("python shellCall.py " + cpyPath2);
 	p.waitFor();
@@ -1420,7 +1447,9 @@ public class DataWriter2 {
 
     }
 
-
+    /**
+     * Load the values for table 3 into Cassandra
+     */
     private void copyPart3() throws IOException, InterruptedException {
 	Process p = Runtime.getRuntime().exec("python shellCall.py " + cpyPath3);
 	p.waitFor();
@@ -1435,7 +1464,9 @@ public class DataWriter2 {
 
     }
 
-
+    /**
+     * Load the values for table 4 into Cassandra
+     */
     private void copyPart4() throws IOException, InterruptedException {
 	Process p = Runtime.getRuntime().exec("python shellCall.py " + cpyPath4);
 	p.waitFor();
@@ -1452,7 +1483,9 @@ public class DataWriter2 {
     }
 
 
-
+    /**
+     * Load the values for table 5 into Cassandra
+     */
     private void copyPart5() throws IOException, InterruptedException {
 	Process p = Runtime.getRuntime().exec("python shellCall.py " + cpyPath5);
 	p.waitFor();
@@ -1465,7 +1498,10 @@ public class DataWriter2 {
 	*/
 
     }
-
+    
+    /**
+     * Load the values for table 6 into Cassandra
+     */
     private void copyPart6() throws IOException, InterruptedException {
 	Process p = Runtime.getRuntime().exec("python shellCall.py " + cpyPath6);
 	p.waitFor();
@@ -1479,7 +1515,10 @@ public class DataWriter2 {
 	
 
     }
-
+    
+    /**
+     * Load the values for table 7 into Cassandra
+     */
     private void copyPart7() throws IOException, InterruptedException {
 	Process p = Runtime.getRuntime().exec("python shellCall.py " + cpyPath7);
 	p.waitFor();
@@ -1494,6 +1533,9 @@ public class DataWriter2 {
 
     }
 
+    /**
+     * Load the values for table 8 into Cassandra
+     */
     private void copyPart8() throws IOException, InterruptedException {
 	Process p = Runtime.getRuntime().exec("python shellCall.py " + cpyPath8);
 	p.waitFor();
@@ -1508,25 +1550,17 @@ public class DataWriter2 {
 
     }
 
-
-    
-    private void copyCity() throws IOException, InterruptedException {
-	Process p = Runtime.getRuntime().exec("python shellCall.py " + cityPath);
-	p.waitFor();
-    }
-    
-
-    private void copyCfc() throws IOException, InterruptedException {
-	Process p = Runtime.getRuntime().exec("python shellCall.py " + cfcPath);
-	p.waitFor();
-    }
-
+    /**
+     * Load the values for Query3_table1 into Cassandra
+     */
     private void copyQuery3_table1() throws IOException, InterruptedException {
 	Process p = Runtime.getRuntime().exec("python shellCall.py " + Q3_1CpyPath);
 	p.waitFor();
     }
 
-
+    /**
+     * Load the values for Query3_table2 into Cassandra
+     */
     private void copyQuery3_table2() throws IOException, InterruptedException {
 	Process p = Runtime.getRuntime().exec("python shellCall.py " + Q3_2CpyPath);
 	p.waitFor();
@@ -1535,21 +1569,23 @@ public class DataWriter2 {
  
        
 	
-	
+	/**
+	 * Write the counts for CFC values and city ids to csv files.
+	 * @param cWriter FileWriter 
+	 * @param cityWriter FileWriter
+	 */
     private void writeMaps(FileWriter cWriter, FileWriter cityWriter) throws IOException {
 	Iterator it;
 	it = cityMap.entrySet().iterator();
 	while (it.hasNext()) {
 	    Map.Entry pairs = (Map.Entry)it.next();
-	    //System.out.println("Here");
 	    cityWriter.write(pairs.getKey().toString());
 	    cityWriter.write(",");
 	    cityWriter.write(pairs.getValue().toString());
 	    cityWriter.write("\n");
 	    it.remove();
 	}
-      
-	//System.out.println();
+
 	it = cfcMap.entrySet().iterator();
 	while (it.hasNext()) {
 	    Map.Entry pairs = (Map.Entry)it.next();

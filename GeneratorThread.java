@@ -15,7 +15,6 @@ public class GeneratorThread extends Thread {
 		try {
 			new DataWriter2(thId);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
