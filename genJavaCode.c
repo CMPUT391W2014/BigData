@@ -31,6 +31,17 @@
 /*
  * TODO:: What does the "Constraint by timestamp" mean in the bottom of the sql schema?
  */
+
+/* how many tables to make*/
+int numTables;
+
+static void usage()
+{
+	extern char * __progname;
+	fprintf(stderr, "usage: %s number_of_tables\n", __progname);
+	exit(1);
+}
+
 static void validate() {
 	char *input, *saveptr1, *s;
 	char *varName, *varType, *line, *ptr;
@@ -51,22 +62,23 @@ static void validate() {
 	fprintf(outJava, "eventWriter.newRow(uuid);\n");
 	sql = fopen ( filename, "r" );
 	int counter = 0;
+	int bound = (480/numTables);
 	/* Start print STARTTIME and SEIZ_CELL_NUM
 	 * This defines the primary keys for each group of 60 columns.
 	 */
 	fprintf(outCode, "\t{ column_name: 'STARTTIME', validation_class: date }\n");
 	fprintf(outCode, "\t{ column_name: 'SEIZ_CELL_NUM', validation_class: varchar(20) }\n");
-	fprintf(outJava, "usersWriter.addColumn(bytes(\"STARTTIME\"), bytes(entry.GETSTARTTIME), timestamp);\n");
-	fprintf(outJava, "usersWriter.addColumn(bytes(\"SEIZ_CELL_NUM\"), bytes(entry.GETSOURCENUMBER), timestamp);\n");
+	fprintf(outJava, "usersWriter.addColumn(bytes(\"STARTTIME\"), bytes(KARL.GETSTARTTIME), timestamp);\n");
+	fprintf(outJava, "usersWriter.addColumn(bytes(\"SEIZ_CELL_NUM\"), bytes(KARL.GETSOURCENUMBER), timestamp);\n");
 	while(fgets(input, 256, sql) != 0) {
-		if (counter >= 60) {
+		if (counter >= bound) {
 			counter = 0;
 			fprintf(outCode, "}\nwith key_validation_class=LexicalUUIDType\n and comparator=AsciiType\n and column_metadata=[\n");
 			fprintf(outCode, "\t{ column_name: 'STARTTIME', validation_class: date }\n");
 			fprintf(outCode, "\t{ column_name: 'SEIZ_CELL_NUM', validation_class: varchar(20) }\n");
 			fprintf(outJava, "\neventWriter.newRow(uuid);\n");
-			fprintf(outJava, "usersWriter.addColumn(bytes(\"STARTTIME\"), bytes(entry.GETSTARTTIME), timestamp);\n");
-			fprintf(outJava, "usersWriter.addColumn(bytes(\"SEIZ_CELL_NUM\"), bytes(entry.GETSOURCENUMBER), timestamp);\n");
+			fprintf(outJava, "usersWriter.addColumn(bytes(\"STARTTIME\"), bytes(KARL.GETSTARTTIME), timestamp);\n");
+			fprintf(outJava, "usersWriter.addColumn(bytes(\"SEIZ_CELL_NUM\"), bytes(KARL.GETSOURCENUMBER), timestamp);\n");
 		}
 		else {
 			counter++;
@@ -89,20 +101,30 @@ static void validate() {
 		
 		// These lines get changed to format the code output
 		//***
-		if (strncmp(varType, varchar, 7) > 0)
+		if (strncmp(varType, varchar, 7) == 0) {
 			varType = "AsciiType";
+			fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n", varName, varType);
+			fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(KARL.randomString), timestamp);\n", varName);
+		}
 		//***
-// 		if (strncmp(varType, integer, 3) > 0)
-// 			varType = "LongType";
-		fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n",
-						 varName, varType);
-		fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(entry.%s), timestamp);\n",
-						varName, varName);
+ 		else if (strncmp(varType, integer, 3) == 0) {
+ 			varType = "LongType";
+			fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n", varName, varType);
+			fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(KARL.randomInt), timestamp);\n",	varName);
+		}
+		else {
+			fprintf(outCode, "\t{ column_name: '%s', validation_class: %s }\n", varName, varType);
+			fprintf(outJava, "usersWriter.addColumn(bytes(\"%s\"), bytes(KARL.randomInt), timestamp);\n",	varName);
+		}
 		//***
 	}
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+	if (argc != 2) {
+		usage();
+	}
+	numTables = atoi(argv[1]);
 	validate();
 	return 1;
 }
